@@ -49,7 +49,7 @@ object App extends SimpleSwingApplication {
     listenTo(menuAbout)
     listenTo(buttonNewMed)
 
-    var meds = new LinkedList
+    var meds = new LinkedList[Medicine]
 
     reactions += {
       case ButtonClicked(b) =>
