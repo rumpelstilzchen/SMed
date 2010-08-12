@@ -61,4 +61,4 @@ zu welchem Datum wie viel des verschriebenen Medikaments eingenommen
 werden sollte.
 
 Bei Fragen oder Fehlermeldungen wenden sie sich an:
-    roman_naumann@fastmail.fm
+    roman_naumann at fastmail.fm
