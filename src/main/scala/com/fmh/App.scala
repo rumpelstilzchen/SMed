@@ -21,15 +21,21 @@ package com.fmh
 
 import scala.swing._
 import scala.swing.event._
-import scala.collection.mutable.LinkedList
+import java.awt.Dimension
 
 object App extends SimpleSwingApplication {
   def top = new MainFrame {
     title = "SMed - Medikamenten Beilage"
+    preferredSize = new Dimension(800,550)
 
     val menuQuit = new MenuItem("Beenden")
     val menuAbout = new MenuItem("Information")
     val buttonNewMed = new Button("Neues Medikament hinzufügen")
+
+    val mainBox = new BoxPanel(Orientation.Vertical) {
+      border = Swing.EmptyBorder(10,30,10,30)
+      contents += buttonNewMed
+    }
 
     menuBar = new MenuBar {
       contents += new Menu("Datei") {
@@ -40,25 +46,35 @@ object App extends SimpleSwingApplication {
       }
     }
 
-    contents = new BoxPanel(Orientation.Vertical) {
-      border = Swing.EmptyBorder(10,30,10,30)
-      contents += buttonNewMed
-    }
+    contents = mainBox
 
     listenTo(menuQuit)
     listenTo(menuAbout)
     listenTo(buttonNewMed)
 
-    var meds = new LinkedList[Medicine]
+    var meds   = List[Medicine]()
+    var mBoxes = List[MedBox]()
 
     reactions += {
       case ButtonClicked(b) =>
         if(b==menuQuit)
           quit()
-        if(b==menuAbout)
-          print("about clicked")
-        if(b==buttonNewMed)
-          print("new med")
+        if(b==menuAbout) {
+          mainBox.contents += new Button("abc") {
+            visible = true
+          }
+          mainBox.revalidate
+        }
+        if(b==buttonNewMed) {
+          val med = new MedBox
+          mBoxes = mBoxes :+ med
+          mainBox.contents += med
+          mainBox.revalidate
+        }
     }
+  }
+
+  private def newMed() = {
+    
   }
 }

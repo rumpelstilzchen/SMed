@@ -21,4 +21,4 @@ package com.fmh
 
 import scala.math.Fractional
 
-class MedCycle(var days:Int, var num:PosRational)
+class MedCycle(val days:Int, val num:PosRational)

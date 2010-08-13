@@ -21,4 +21,7 @@ package com.fmh
 
 import java.util.Date
 
-class Medicine (var name:String, var begin:Date, var cycles:List[MedCycle])
+class Medicine (val name:String
+               ,val tabletSize:String
+               ,val begin:Date
+               ,val cycles:List[MedCycle])
