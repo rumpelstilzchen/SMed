@@ -28,13 +28,18 @@ class PosRational(n:Int,d:Int) {
 
   def this(n:Int) = this(n,1)
 
-  override def toString = numer +"/"+ denom
+  override def toString = if (denom==1)
+                            ""+numer
+                          else
+                            numer +"/"+ denom
 
   private def gcd(a:Int, b:Int):Int =
     if (b==0) a else gcd(b, a%b)
 }
 
 object PosRational {
+  def div(x:Int,y:PosRational):Double = x*y.numer/y.denom
+  
   def apply(s:String):PosRational = {
     if(s exists (_=='/')) {
       val xs = s split '/'

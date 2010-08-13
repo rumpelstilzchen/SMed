@@ -22,19 +22,17 @@ package com.fmh
 import scala.swing._
 import scala.swing.event._
 import java.util.Date
-import java.text.SimpleDateFormat
 import java.text.ParsePosition
 import java.awt.Dimension
 
 class MedBox extends BoxPanel(Orientation.Horizontal) {
-  private val dateFormat = new SimpleDateFormat("dd.mm.yyyy")
   val medName = new TextField("Medikamentenname") {
     maximumSize = new Dimension(400,30)
   }
   val tabSize = new TextField("Tabl. Gr.") {
     maximumSize = new Dimension(150,30)
   }
-  val beginDate = new TextField(dateFormat.format(new Date)) {
+  val beginDate = new TextField(Util.dateFormat.format(new Date)) {
     maximumSize = new Dimension(100,30)
   }
   val cyclesBox = new CyclesBox
@@ -47,7 +45,7 @@ class MedBox extends BoxPanel(Orientation.Horizontal) {
   def parseMedicine() = new Medicine(
     name = medName.text
    ,tabletSize = tabSize.text
-   ,begin = dateFormat.parse(beginDate.text,new ParsePosition(0))
+   ,begin = Util.dateFormat.parse(beginDate.text,new ParsePosition(0))
    ,cycles = cyclesBox.parseCycles
   )
 }
@@ -94,7 +92,10 @@ class SingleCycleBox extends BoxPanel(Orientation.Horizontal) {
   contents += cNumTabs
   contents += plusMinus
 
-  def parseCycle() = new MedCycle(cDays.text.toInt
-                                 ,PosRational(cNumTabs.text)
-                     )
+  def parseCycle() = new MedCycle(if ((cDays.text equals "")
+                                      || (cDays.text equals "Tage"))
+                                    -1
+                                  else
+                                    cDays.text.toInt
+                                 ,PosRational(cNumTabs.text))
 }
