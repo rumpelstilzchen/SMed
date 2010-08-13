@@ -38,28 +38,26 @@ class MedBox extends BoxPanel(Orientation.Horizontal) {
     maximumSize = new Dimension(100,30)
   }
   val cyclesBox = new CyclesBox
-  val ok = new Button("Ok") {
-    maximumSize = new Dimension(50,30)
-  }
 
   contents += medName
   contents += tabSize
   contents += beginDate
   contents += cyclesBox
-  contents += ok
 
-/*  def parseMedicine() = new Medicine(
+  def parseMedicine() = new Medicine(
     name = medName.text
    ,tabletSize = tabSize.text
    ,begin = dateFormat.parse(beginDate.text,new ParsePosition(0))
-   ,cycles = List[MedCycle]()
-  )*/
+   ,cycles = cyclesBox.parseCycles
+  )
 }
 
 class CyclesBox extends BoxPanel(Orientation.Vertical) {
   var cycleBoxes = List[SingleCycleBox](new SingleCycleBox)
   listenTo(cycleBoxes(0).plusMinus)
   contents ++= cycleBoxes
+
+  def parseCycles() = cycleBoxes map (_.parseCycle)
 
   reactions += {
     case ButtonClicked(b) =>
@@ -95,4 +93,8 @@ class SingleCycleBox extends BoxPanel(Orientation.Horizontal) {
   contents += cDays
   contents += cNumTabs
   contents += plusMinus
+
+  def parseCycle() = new MedCycle(cDays.text.toInt
+                                 ,PosRational(cNumTabs.text)
+                     )
 }

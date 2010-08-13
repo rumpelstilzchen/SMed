@@ -31,6 +31,7 @@ object App extends SimpleSwingApplication {
     val menuQuit = new MenuItem("Beenden")
     val menuAbout = new MenuItem("Information")
     val buttonNewMed = new Button("Neues Medikament hinzufügen")
+    val print = new Button("Druckansicht")
 
     val mainBox = new BoxPanel(Orientation.Vertical) {
       border = Swing.EmptyBorder(10,30,10,30)
@@ -68,7 +69,15 @@ object App extends SimpleSwingApplication {
         if(b==buttonNewMed) {
           val med = new MedBox
           mBoxes = mBoxes :+ med
+          mainBox.contents += new Separator {
+            foreground = background
+            maximumSize = new Dimension(800,7)
+          }
           mainBox.contents += med
+          mainBox.contents += new Separator {
+            foreground = background
+            maximumSize = new Dimension(800,7)
+          }
           mainBox.revalidate
         }
     }
