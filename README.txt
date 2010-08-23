@@ -80,6 +80,7 @@ SMed uses iText PDF, which is released under it's own license:
      must retain the producer line in every PDF that is created or manipulated using iText.
 
 ###########################################################################################
+				Information
 ###########################################################################################
 
 SMed ist ein kleines Programm für Ärzte bzw. Arzthelfer, um eine
@@ -89,3 +90,25 @@ werden sollte.
 
 Bei Fragen oder Fehlermeldungen wenden sie sich an:
     roman_naumann at fastmail.fm
+
+###########################################################################################
+				Kompilierung
+###########################################################################################
+
+Sie brauchen eine aktuelle JDK Version (1.5 oder höher) und das Programm Maven in Version
+2 oder höher.
+
+Im Programm-Hauptverzeichnis müssen sie von Hand iText zu ihrem lokalen Maven Repository
+hinzufügen, welches unter ./lib liegt:
+
+mvn install:install-file -DgroupId=com.lowagie -DartifactId=itext -Dversion=5.0.3 -Dpackaging=jar -Dfile=lib/iText-5.0.3.jar
+
+Im Anschluss können sie das Programm kompilieren mit:
+
+mvn clean compile package
+
+Unter Windows bietet es sich an, die .bat Datei im Hauptverzeichnis auszuführen, evtl. müssen
+sie von Hand die Versionsendung der target/*.jar Datei anpassen in der .bat Datei.
+
+SMed schaut unter data/logo.png nach ihrem Praxislogo und unter data/kontakt.txt nach ihren
+Praxis-Kontaktinformationen.

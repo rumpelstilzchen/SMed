@@ -39,8 +39,11 @@ object App extends SimpleSwingApplication {
     title = "SMed - Medikamenten Beilage"
     preferredSize = new Dimension(800,550)
 
+    val menuSave = new MenuItem("Speichern")
+    val menuAdd  = new MenuItem("Neues Medikamen")
+    val menuPrint = new MenuItem("Druckansicht")
     val menuQuit = new MenuItem("Beenden")
-    //val menuAbout = new MenuItem("Information")
+    val menuAbout = new MenuItem("Information")
     val buttonNewMed = new Button("Neues Medikament hinzufügen")
     val buttonPrint = new Button("Druckansicht")
 
@@ -52,7 +55,13 @@ object App extends SimpleSwingApplication {
 
     menuBar = new MenuBar {
       contents += new Menu("Datei") {
+        contents += menuSave
+        contents += menuAdd
+        contents += menuPrint
         contents += menuQuit
+      }
+      contents += new Menu("Hilfe") {
+        contents += menuAbout
       }
     }
 
@@ -68,7 +77,7 @@ object App extends SimpleSwingApplication {
       case ButtonClicked(b) =>
         if(b==menuQuit)
           quit()
-        if(b==buttonNewMed) {
+        if(b==buttonNewMed || b==menuAdd) {
           val med = new MedBox
           mBoxes = mBoxes :+ med
           mainBox.contents += new Separator {
@@ -82,7 +91,7 @@ object App extends SimpleSwingApplication {
           }
           mainBox.revalidate
         }
-        if(b==buttonPrint) {
+        if(b==buttonPrint || b==menuPrint) {
           createPDF
         }
     }
