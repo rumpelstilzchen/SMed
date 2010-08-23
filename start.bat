@@ -1,1 +1,1 @@
-java -jar target/SMed-1.0-jar-with-dependencies.jar
+java -jar target/SMed-1.1-SNAPSHOT-jar-with-dependencies.jar
