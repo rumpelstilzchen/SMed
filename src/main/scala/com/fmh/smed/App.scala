@@ -17,7 +17,7 @@
  * along with SMed.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.fmh
+package com.fmh.smed
 
 import scala.swing._
 import scala.swing.event._

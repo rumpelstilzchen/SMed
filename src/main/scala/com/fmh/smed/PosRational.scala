@@ -17,7 +17,7 @@
  * along with SMed.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.fmh
+package com.fmh.smed
 
 class PosRational(n:Int,d:Int) {
   require (d>0)

@@ -68,7 +68,7 @@
 	  </descriptorRefs>
 	  <archive>
             <manifest>
-              <mainClass>com.fmh.App</mainClass>
+              <mainClass>com.fmh.smed.App</mainClass>
             </manifest>
 	  </archive>
 	</configuration>

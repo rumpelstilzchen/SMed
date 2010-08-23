@@ -17,8 +17,11 @@
  * along with SMed.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.fmh
+package com.fmh.smed
 
-import scala.math.Fractional
+import java.util.Date
 
-class MedCycle(val days:Int, val num:PosRational)
+class Medicine (val name:String
+               ,val tabletSize:String
+               ,val begin:Date
+               ,val cycles:List[MedCycle])
