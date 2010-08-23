@@ -21,4 +21,6 @@ package com.fmh.smed
 
 import scala.math.Fractional
 
+@serializable
+@SerialVersionUID(0)
 class MedCycle(val days:Int, val num:PosRational)

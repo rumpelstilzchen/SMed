@@ -60,16 +60,20 @@ class CyclesBox extends BoxPanel(Orientation.Vertical) {
 
   def parseCycles() = cycleBoxes map (_.parseCycle)
 
-  reactions += {
-    case ButtonClicked(b) =>
-      if (b.text equals "+") {
-        b.text = "-"
+  def addCycleBox() = {
         val newCycleBox = new SingleCycleBox
-        cycleBoxes = cycleBoxes :+ newCycleBox
+        cycleBoxes = cycleBoxes ++ List(newCycleBox)
         listenTo(newCycleBox.plusMinus)
         contents.clear
         contents ++= cycleBoxes
         revalidate
+  }
+
+  reactions += {
+    case ButtonClicked(b) =>
+      if (b.text equals "+") {
+        b.text = "-"
+        addCycleBox
       }
       else if (b.text equals "-") {
         deafTo(b)
@@ -84,7 +88,7 @@ class CyclesBox extends BoxPanel(Orientation.Vertical) {
 class SingleCycleBox extends BoxPanel(Orientation.Horizontal) {
   val cDays = new TextField("Tage") {
     maximumSize = new Dimension(80,30)
-    inputVerifier = Verifiers.customDate
+    inputVerifier = Verifiers.customDays
   }
   val cNumTabs = new TextField("Tbl.") {
     maximumSize = new Dimension(80,30)
@@ -110,9 +114,9 @@ object Verifiers {
   val num = (c:Component) => !c.asInstanceOf[TextField].text.exists(!_.isDigit)
   val posRational = (c:Component) => PosRational.isValid(c.asInstanceOf[TextField].text)
   val date = (c:Component) => isDate(c.asInstanceOf[TextField].text) 
-  val customDate = (c:Component) => (isDate(c.asInstanceOf[TextField].text)
-                                     || c.asInstanceOf[TextField].text == "Tage"
-                                     || c.asInstanceOf[TextField].text == "")
+  val customDays = (c:Component) => (num(c) && c.asInstanceOf[TextField].text.toInt > 0
+                                      || c.asInstanceOf[TextField].text == "Tage"
+                                      || c.asInstanceOf[TextField].text == "")
   val numUnit = (c:Component) => c.asInstanceOf[TextField].text.matches(
     "\\d+\\p{Alpha}+"
   )

@@ -21,7 +21,10 @@ package com.fmh.smed
 
 import java.util.Date
 
+@serializable
+@SerialVersionUID(0)
 class Medicine (val name:String
                ,val tabletSize:String
                ,val begin:Date
-               ,val cycles:List[MedCycle])
+               ,val cycles:List[MedCycle]) {
+}

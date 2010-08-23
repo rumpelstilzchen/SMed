@@ -19,6 +19,8 @@
 
 package com.fmh.smed
 
+@serializable
+@SerialVersionUID(0)
 class PosRational(n:Int,d:Int) {
   require (d>0)
   require (n>0)

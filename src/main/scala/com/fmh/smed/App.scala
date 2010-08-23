@@ -22,6 +22,7 @@ package com.fmh.smed
 import scala.swing._
 import scala.swing.event._
 import java.awt.Dimension
+import javax.swing.JOptionPane
 import com.itextpdf.text.Document
 import com.itextpdf.text.Paragraph
 import com.itextpdf.text.PageSize
@@ -29,7 +30,11 @@ import com.itextpdf.text.FontFactory
 import com.itextpdf.text.Font
 import com.itextpdf.text.Image
 import com.itextpdf.text.pdf.PdfWriter
+import java.io.File
 import java.io.FileOutputStream
+import java.io.FileInputStream
+import java.io.ObjectOutputStream
+import java.io.ObjectInputStream
 import java.util.Calendar
 import java.util.Date
 import java.text.SimpleDateFormat
@@ -44,93 +49,229 @@ object AllSelector extends Reactor {
 }
 
 object App extends SimpleSwingApplication {
+  val version = "1.1"
+
+  val menuSave = new MenuItem("Speichern")
+  val menuReset = new MenuItem("Zurücksetzen")
+  val menuLoad = new MenuItem("Laden")
+  val menuAdd  = new MenuItem("Neues Medikament")
+  val menuPrint = new MenuItem("Druckansicht")
+  val menuQuit = new MenuItem("Beenden")
+  val menuAbout = new MenuItem("Information")
+
+  val buttonNewMed = new Button("Neues Medikament hinzufügen")
+
+  val buttonPrint = new Button("Druckansicht")
+
+  val entryPatient = new TextField("Patientenname") {
+    maximumSize = new Dimension(600,30)
+  }
+  AllSelector.listenTo(entryPatient)
+
+
+  val mainBox = new BoxPanel(Orientation.Vertical) {
+    border = Swing.EmptyBorder(10,30,10,30)
+    contents += buttonNewMed
+    contents += buttonPrint
+    contents += entryPatient
+  }
+
+  val mBar = new MenuBar {
+    contents += new Menu("Datei") {
+      contents += menuAdd
+      contents += menuLoad
+      contents += menuPrint
+      contents += menuSave
+      contents += menuReset
+      contents += menuQuit
+    }
+    contents += new Menu("Hilfe") {
+      contents += menuAbout
+    }
+  }
+
+  var mBoxes = List[MedBox]()
+
+  val infoMsg = "<html><b>SMed - Medikamentenbeilage</b>\n"+
+  "Copyright (c) 2010 Roman Naumann\n"+
+  "Veröffentlicht unter GPLv3 Lizenz, siehe COPYING.txt\n"+
+  "\n"+
+  "http://www.github.com/rumpelstielzchen/SMed\n"+
+  "roman_naumann at fastmail.fm"
+
+
+
   def top = new MainFrame {
     title = "SMed - Medikamenten Beilage"
     preferredSize = new Dimension(800,550)
 
-    val menuSave = new MenuItem("Speichern")
-    val menuAdd  = new MenuItem("Neues Medikamen")
-    val menuPrint = new MenuItem("Druckansicht")
-    val menuQuit = new MenuItem("Beenden")
-    val menuAbout = new MenuItem("Information")
-
-    val buttonNewMed = new Button("Neues Medikament hinzufügen")
-
-    val buttonPrint = new Button("Druckansicht")
-
-    val entryPatient = new TextField("Patientenname") {
-      maximumSize = new Dimension(400,30)
-    }
-    AllSelector.listenTo(entryPatient)
-
-
-    val mainBox = new BoxPanel(Orientation.Vertical) {
-      border = Swing.EmptyBorder(10,30,10,30)
-      contents += buttonNewMed
-      contents += buttonPrint
-      contents += entryPatient
-    }
-
-    menuBar = new MenuBar {
-      contents += new Menu("Datei") {
-        contents += menuSave
-        contents += menuAdd
-        contents += menuPrint
-        contents += menuQuit
-      }
-      contents += new Menu("Hilfe") {
-        contents += menuAbout
-      }
-    }
-
     contents = mainBox
+    menuBar = mBar
 
     listenTo(menuAdd)
     listenTo(menuAbout)
+    listenTo(menuSave)
+    listenTo(menuLoad)
     listenTo(menuPrint)
     listenTo(menuQuit)
     listenTo(buttonNewMed)
     listenTo(buttonPrint)
-
-    var mBoxes = List[MedBox]()
+    listenTo(menuReset)
 
     reactions += {
-      case ButtonClicked(b) =>
+      case ButtonClicked(b) => {
+        if(b==menuReset) {
+          clearMainBox
+          mainBox.revalidate
+        } 
+        if(b==menuSave)
+          save
+        if(b==menuLoad)
+          load
         if(b==menuAbout)
-          entryPatient.selectAll
+          JOptionPane.showMessageDialog(null
+                                        ,infoMsg
+                                        ,"SMed - "+version
+                                        ,JOptionPane.INFORMATION_MESSAGE)
         if(b==menuQuit)
           quit()
         if(b==buttonNewMed || b==menuAdd) {
-          val med = new MedBox
-          mBoxes = mBoxes :+ med
-          mainBox.contents += new Separator {
-            foreground = background
-            maximumSize = new Dimension(800,7)
-          }
-          mainBox.contents += med
-          mainBox.contents += new Separator {
-            foreground = background
-            maximumSize = new Dimension(800,7)
-          }
-          mainBox.revalidate
+          addMed
         }
         if(b==buttonPrint || b==menuPrint) {
           createPDF
         }
+      }
     }
+  }
+
+  def addMed() {
+    val med = new MedBox
+    mBoxes = mBoxes ++ List(med)
+    mainBox.contents += new Separator {
+      foreground = background
+      maximumSize = new Dimension(800,7)
+    }
+    mainBox.contents += med
+    mainBox.contents += new Separator {
+      foreground = background
+      maximumSize = new Dimension(800,7)
+    }
+    mainBox.revalidate
+  }
 
 
   def parseMeds() = mBoxes map (_.parseMedicine)
+
+  def clearMainBox() = {
+    var toRem:List[Component] = List()
+    for (c <- mainBox.contents) {
+      if (!(c==buttonNewMed || c==buttonPrint || c==entryPatient)) {
+        c.enabled=false
+        c.visible=false
+        toRem = c::toRem
+      }
+    }
+    for (c <- toRem) mainBox.contents -= c
+
+    mBoxes = List()
+  }
+
+  def load(): Unit = {
+    try {
+      val saves = new File("saves")
+      saves.mkdir
+      val fileChooser = new FileChooser(saves)
+      fileChooser.showOpenDialog(mainBox)
+      val inFile = fileChooser.selectedFile
+      if(!inFile.canRead()) {
+        JOptionPane.showMessageDialog(null
+                                      ,"Die gewählte Datei kann "+
+                                      "nicht gelesen werden."
+                                      ,"Fehler beim Laden"
+                                      ,JOptionPane.ERROR_MESSAGE)
+        return ()
+      }
+      val ois = new ObjectInputStream(new FileInputStream(inFile))
+      val meds = ois.readObject.asInstanceOf[List[Medicine]]
+      ois.close
+
+      clearMainBox
+      
+      for(m <- meds) {
+        addMed
+        val box = mBoxes.last
+        box.medName.text = m.name
+        box.tabSize.text = m.tabletSize
+        box.beginDate.text = Util.dateFormat.format(m.begin)
+
+        box.cyclesBox.contents.clear
+        box.cyclesBox.cycleBoxes = List()
+        for(c <- m.cycles) {
+          box.cyclesBox.addCycleBox
+          box.cyclesBox.cycleBoxes.last.cDays.text = if (c.days == -1) ""
+                                                     else c.days.toString
+          box.cyclesBox.cycleBoxes.last.cNumTabs.text = c.num.toString
+          box.cyclesBox.cycleBoxes.last.plusMinus.text = "-"
+        }
+        box.cyclesBox.cycleBoxes.last.plusMinus.text = "+"
+      }
+
+      mainBox.revalidate
+    } catch {
+      case e:Exception =>
+        JOptionPane.showMessageDialog(null
+                                      ,"Beim Laden der Datei ist "+
+                                      "ein Fehler aufgetreten.\n"+
+                                      "Bitte überprüfen sie ihre Angaben."
+                                      ,"Fehler beim Laden"
+                                      ,JOptionPane.ERROR_MESSAGE)
+    }    
+  }
+
+  def save(): Unit = {
+    try {
+      val saves = new File("saves")
+      saves.mkdir
+      val meds = parseMeds
+      val fileChooser = new FileChooser(saves)
+      fileChooser.showSaveDialog(mainBox)
+      var outFile = fileChooser.selectedFile
+      if(!outFile.getAbsolutePath.matches(".*\\.med"))
+        outFile = new File(outFile.getAbsolutePath+".med")
+      outFile.createNewFile
+      if(!outFile.canWrite()) {
+        JOptionPane.showMessageDialog(null
+                                      ,"In die gewählte Datei kann "+
+                                      "nicht geschrieben werden."
+                                      ,"Fehler beim Speichern"
+                                      ,JOptionPane.ERROR_MESSAGE)
+        return ()
+      }
+      val oos = new ObjectOutputStream(new FileOutputStream(outFile))
+      oos.writeObject(meds)
+      oos.flush
+      oos.close
+    } catch {
+      case e:Exception =>
+        JOptionPane.showMessageDialog(null
+                                      ,"Beim Speichern der Datei ist "+
+                                      "ein Fehler aufgetreten.\n"+
+                                      "Bitte überprüfen sie ihre Angaben."
+                                      ,"Fehler beim Speichern"
+                                      ,JOptionPane.ERROR_MESSAGE)
+    }
+  }
 
   def createPDF() {
     val document = new Document(PageSize.A4, 50, 50, 50, 50)
     PdfWriter.getInstance(document , new FileOutputStream("beilage.pdf"))
 
-    document.addAuthor("SMed")
+    document.addAuthor("SMed "+version)
     document.addSubject("Medikamenten-Beilage")
     document.open();
     document.add(new Paragraph("Medikamenten-Information",fontTitle))
-    document.add(new Paragraph("Beilage für: "+entryPatient.text,fontMedTitle))
+    document.add(new Paragraph("Bestimmt für: "+entryPatient.text,fontMedTitle))
     val logo = Image.getInstance("data/logo.jpg")
     document.add(logo)
     
@@ -169,18 +310,14 @@ object App extends SimpleSwingApplication {
     Runtime.getRuntime().exec("cmd /c start " + "beilage.pdf")
   }
 
-
-  }
-
-
   def fD(d:Date):String = Util.dateFormat.format(d)
 
   private val fontTitle = FontFactory.getFont(FontFactory.HELVETICA
-                                             ,22,Font.BOLDITALIC)
+                                              ,22,Font.BOLDITALIC)
   private val fontMedTitle = FontFactory.getFont(FontFactory.COURIER
-                                                ,18)
+                                                 ,18)
   private val fontMed = FontFactory.getFont(FontFactory.COURIER
-                                           ,14)
+                                            ,14)
 }
 
 object Util {
