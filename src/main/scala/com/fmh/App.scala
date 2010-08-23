@@ -34,6 +34,15 @@ import java.util.Calendar
 import java.util.Date
 import java.text.SimpleDateFormat
 
+object AllSelector extends Reactor {
+  reactions += {
+    case FocusGained(c,o,t) => {
+      println("FOCUS GAINED")
+      c.asInstanceOf[TextComponent].selectAll
+    }
+  }
+}
+
 object App extends SimpleSwingApplication {
   def top = new MainFrame {
     title = "SMed - Medikamenten Beilage"
@@ -44,13 +53,22 @@ object App extends SimpleSwingApplication {
     val menuPrint = new MenuItem("Druckansicht")
     val menuQuit = new MenuItem("Beenden")
     val menuAbout = new MenuItem("Information")
+
     val buttonNewMed = new Button("Neues Medikament hinzufügen")
+
     val buttonPrint = new Button("Druckansicht")
+
+    val entryPatient = new TextField("Patientenname") {
+      maximumSize = new Dimension(400,30)
+    }
+    AllSelector.listenTo(entryPatient)
+
 
     val mainBox = new BoxPanel(Orientation.Vertical) {
       border = Swing.EmptyBorder(10,30,10,30)
       contents += buttonNewMed
       contents += buttonPrint
+      contents += entryPatient
     }
 
     menuBar = new MenuBar {
@@ -67,6 +85,9 @@ object App extends SimpleSwingApplication {
 
     contents = mainBox
 
+    listenTo(menuAdd)
+    listenTo(menuAbout)
+    listenTo(menuPrint)
     listenTo(menuQuit)
     listenTo(buttonNewMed)
     listenTo(buttonPrint)
@@ -75,6 +96,8 @@ object App extends SimpleSwingApplication {
 
     reactions += {
       case ButtonClicked(b) =>
+        if(b==menuAbout)
+          entryPatient.selectAll
         if(b==menuQuit)
           quit()
         if(b==buttonNewMed || b==menuAdd) {
@@ -107,6 +130,7 @@ object App extends SimpleSwingApplication {
     document.addSubject("Medikamenten-Beilage")
     document.open();
     document.add(new Paragraph("Medikamenten-Information",fontTitle))
+    document.add(new Paragraph("Beilage für: "+entryPatient.text,fontMedTitle))
     val logo = Image.getInstance("data/logo.jpg")
     document.add(logo)
     

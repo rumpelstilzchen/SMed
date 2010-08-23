@@ -38,6 +38,12 @@ class PosRational(n:Int,d:Int) {
 }
 
 object PosRational {
+  def isValid(s:String):Boolean = {
+    try { val r = apply(s) }
+    catch { case e:Exception => return false}
+    return true
+  }
+
   def div(x:Int,y:PosRational):Double = x*y.numer/y.denom
   
   def apply(s:String):PosRational = {

@@ -31,9 +31,11 @@ class MedBox extends BoxPanel(Orientation.Horizontal) {
   }
   val tabSize = new TextField("Tabl. Gr.") {
     maximumSize = new Dimension(150,30)
+    inputVerifier = Verifiers.numUnit
   }
   val beginDate = new TextField(Util.dateFormat.format(new Date)) {
     maximumSize = new Dimension(100,30)
+    inputVerifier = Verifiers.date
   }
   val cyclesBox = new CyclesBox
 
@@ -41,6 +43,7 @@ class MedBox extends BoxPanel(Orientation.Horizontal) {
   contents += tabSize
   contents += beginDate
   contents += cyclesBox
+  AllSelector.listenTo(medName,tabSize,beginDate)
 
   def parseMedicine() = new Medicine(
     name = medName.text
@@ -81,13 +84,16 @@ class CyclesBox extends BoxPanel(Orientation.Vertical) {
 class SingleCycleBox extends BoxPanel(Orientation.Horizontal) {
   val cDays = new TextField("Tage") {
     maximumSize = new Dimension(80,30)
+    inputVerifier = Verifiers.customDate
   }
   val cNumTabs = new TextField("Tbl.") {
     maximumSize = new Dimension(80,30)
+    inputVerifier = Verifiers.posRational
   }
   val plusMinus = new Button("+") {
     maximumSize = new Dimension(80,30)
   }
+  AllSelector.listenTo(cDays,cNumTabs)
   contents += cDays
   contents += cNumTabs
   contents += plusMinus
@@ -98,4 +104,25 @@ class SingleCycleBox extends BoxPanel(Orientation.Horizontal) {
                                   else
                                     cDays.text.toInt
                                  ,PosRational(cNumTabs.text))
+}
+
+object Verifiers {
+  val num = (c:Component) => !c.asInstanceOf[TextField].text.exists(!_.isDigit)
+  val posRational = (c:Component) => PosRational.isValid(c.asInstanceOf[TextField].text)
+  val date = (c:Component) => isDate(c.asInstanceOf[TextField].text) 
+  val customDate = (c:Component) => (isDate(c.asInstanceOf[TextField].text)
+                                     || c.asInstanceOf[TextField].text == "Tage"
+                                     || c.asInstanceOf[TextField].text == "")
+  val numUnit = (c:Component) => c.asInstanceOf[TextField].text.matches(
+    "\\d+\\p{Alpha}+"
+  )
+
+  private def isDate(s:String): Boolean = {
+    try {
+      Util.dateFormat.parse(s,new ParsePosition(0))
+    } catch {
+      case e:Exception => return false
+    }
+    return true
+  }
 }
